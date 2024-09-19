@@ -18,7 +18,7 @@
 3. Установить программный пакет swirl: через интерфейс Rstudio IDE или функцией R install.packages("swirl")
 4. Запустить задание с помощью swirl::swirl()
 
-```
+```R
 > swirl::swirl()
 
 | Welcome to swirl! Please sign in. If you've been here before, use the

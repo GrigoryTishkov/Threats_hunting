@@ -18,7 +18,8 @@
 3. Установить программный пакет swirl: через интерфейс Rstudio IDE или функцией R install.packages("swirl")
 4. Запустить задание с помощью swirl::swirl()
 
-"> swirl::swirl()
+```
+> swirl::swirl()
 
 | Welcome to swirl! Please sign in. If you've been here before, use the
 | same name as you did then. If you are new, call yourself something
@@ -29,4 +30,6 @@ What shall I call you? TishkovGrigory
 | Thanks, TishkovGrigory. Let's cover a couple of quick housekeeping
 | items before we begin our first lesson. First of all, you should know
 | that when you see '...', that means you should press Enter when you
-| are done reading and ready to continue."
+| are done reading and ready to continue.
+```
+

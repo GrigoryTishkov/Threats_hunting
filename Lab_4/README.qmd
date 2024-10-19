@@ -57,7 +57,7 @@ FROM
 where src like '12.%' or src like '13.%' or src like '14.%'
 ```
 ![](img/7.png)
-b)
+b) Определите суммарный объем исходящего трафика
 ```{sql}
 SELECT
 sum(bytes) summ
@@ -68,7 +68,7 @@ and (dst not like '12.%' and dst not like '13.%' and dst not like '14.%')
 ```
 ![](img/8.png)
 
-c)
+c)Определите суммарный объем входящего трафика
 ```{sql}
 SELECT
 sum(bytes) summ

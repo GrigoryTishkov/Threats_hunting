@@ -41,7 +41,7 @@
 5. Выполняем задания:
 
 a) Известно, что IP адреса внутренней сети начинаются с октетов, принадлежащих интервалу [12-14]. Определите количество хостов внутренней сети, представленных в датасете.
-```{sql}
+```{r}
 SELECT
 count(DISTINCT src) counter
 FROM
@@ -50,7 +50,7 @@ where src like '12.%' or src like '13.%' or src like '14.%'
 ```
 ![](img/7.png)
 b) Определите суммарный объем исходящего трафика
-```{sql}
+```{r}
 SELECT
 sum(bytes) summ
 FROM
@@ -61,7 +61,7 @@ and (dst not like '12.%' and dst not like '13.%' and dst not like '14.%')
 ![](img/8.png)
 
 c)Определите суммарный объем входящего трафика
-```{sql}
+```{r}
 SELECT
 sum(bytes) summ
 FROM

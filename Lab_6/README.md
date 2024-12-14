@@ -68,6 +68,8 @@ ROUND(([timestamp] - DATETRUNC([timestamp], "second")) * 100000,2)
 
 d) Все построенные графики вывести в виде единого дашборда в Yandex DataLens.
 
+Ссылка на дашборд: https://datalens.yandex.cloud/v9ebwygx4gmwi-dashboard-tishkov-g-v
+
 ![](img/6.png)
 
 ## Оценка результата

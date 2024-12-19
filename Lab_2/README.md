@@ -28,17 +28,20 @@ gtishckov@yandex.ru
 
 1.  Для начала прохождения курса необходимо установить программный пакет dplyr.
 
-    ```         
-    install.packages("dplyr")
-    ```
+```{r}         
+install.packages("dplyr")
+```
 
 2.  Загружаем библиотеку. и выполняем задания
+
+
+```{r}
+library(dplyr)
+```
 
 a\) Сколько строк в датафрейме?
 
 ```{r}
-library(dplyr)
-
 starwars %>% nrow()
 
 ```

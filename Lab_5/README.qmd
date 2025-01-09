@@ -1,146 +1,146 @@
 ---
- title: "Исследование информации о состоянии беспроводных сетей"
+ title: 'Исследование информации о состоянии беспроводных сетей'
  author: "gtishckov@yandex.ru"
  format: 
    md:
      output-file: README.md
 ---
 
-# Исследование информации о состоянии беспроводных сетей
-
 ## Цель работы
 
 1. Получить знания о методах исследования радиоэлектронной обстановки.
 2. Составить представление о механизмах работы Wi-Fi сетей на канальном и сетевом уровне модели OSI.
-3. Закрепить практические навыки использования языка программирования R для обработки данных.
-4. Закрепить знания основных функций обработки данных экосистемы tidyverse языка R.
+3. Зекрепить практические навыки использования языка программирования R для обработки данных
+4. Закрепить знания основных функций обработки данных экосистемы tidyverse языка R
 
-## Исходные данные
+## Исходные данные 
 
 1. Программное обеспечение Windows 11
-2. Rstudio Desktop
-3. Интерпретатор языка R 4.4.1
-4. csv данные p2_wifi_data
+2. Rstudio Desktop и пакет dplyr
+3. Интерпретатор языка R 4.1
+4. Тестовые данные p2_wifi_data.csv
 
 ## План
 
-1. Импортировать csv файл
-2. Используя пакет dplyr решить задания
+1. Импортировать данные
+2. Привести датасеты в вид “аккуратных данных”, преобразовать типы столбцов в соответствии с типом данных
+3. Просмотреть общую структуру данных с помощью функции glimpse() и провести анализ
 
-## Шаги
+## Ход выполения работы
 
-1. Импортируем csv файл, учитывая два датасета.
+### Импорт данных 
 
 ```{r}
 library(tidyverse)
 library(dplyr)
 library(readr)
-dataset1 <- read.csv("P2_wifi_data.csv", nrows = 167)
-dataset2 <- read.csv("P2_wifi_data.csv", skip = 169)
-```
-2. Приводим данные к соответствующим типам.
-
-```{r}
-dataset1 <- dataset1 %>% 
-  mutate_at(vars(BSSID, Privacy, Cipher, Authentication, LAN.IP, ESSID), trimws) %>%
-  mutate_at(vars(BSSID, Privacy, Cipher, Authentication, LAN.IP, ESSID), na_if, "")
-
-dataset1$First.time.seen <- as.POSIXct(dataset1$First.time.seen, format = "%Y-%m-%d %H:%M:%S")
-dataset1$Last.time.seen <- as.POSIXct(dataset1$Last.time.seen, format = "%Y-%m-%d %H:%M:%S")
-
-dataset2 <- dataset2 %>% 
-  mutate_at(vars(Station.MAC, BSSID, Probed.ESSIDs), trimws) %>%
-  mutate_at(vars(Station.MAC, BSSID, Probed.ESSIDs), na_if, "")
-
-dataset2$First.time.seen <- as.POSIXct(dataset2$First.time.seen, format = "%Y-%m-%d %H:%M:%S")
-dataset2$Last.time.seen <- as.POSIXct(dataset2$Last.time.seen, format = "%Y-%m-%d %H:%M:%S")
-
-glimpse(dataset1)
-glimpse(dataset2)
-```
-3. Точки доступа a. Определить небезопасные точки доступа (без шифрования – OPN).
-
-```{r}
-unsafe_access_points <- dataset1 %>% filter(grepl("OPN", Privacy))
-
-unsafe_access_points %>% select(BSSID, ESSID, Privacy)
+ds1<-read.csv("P2_wifi_data.csv",nrows = 167)
+ds2<-read.csv("P2_wifi_data.csv",skip = 169)
 ```
 
-b. Определить производителя для каждого обнаруженного устройства
-
-E8:28:C1 - Eltex Enterprise Ltd 00:25:00 - Apple Inc E0:D9:E3 - Eltex Enterprise Ltd 00:26:99 - Cisco Systems 00:03:7A - Taiyo Yuden Co 00:3E:1A - Xerox 00:03:7F6 - Atheros Communications, Inc.
-
-c. Выявить устройства, использующие последнюю версию протокола шифрования WPA3, и названия точек доступа, реализованных на этих устройствах
+### Формирование "аккуратных данных"
 
 ```{r}
-wpa3_devices <- dataset1 %>% filter(grepl("WPA3", Privacy))
+ds1<-ds1%>%mutate_at(vars(BSSID,Privacy,Cipher,Authentication,LAN.IP,ESSID),trimws)%>%mutate_at(vars(BSSID,Privacy,Cipher,Authentication,LAN.IP,ESSID),na_if,"")
+ds1$First.time.seen<-as.POSIXct(ds1$First.time.seen,format="%Y-%m-%d %H:%M:%S")
+ds1$Last.time.seen<-as.POSIXct(ds1$Last.time.seen,format="%Y-%m-%d %H:%M:%S")
 
-wpa3_devices %>% select(BSSID, ESSID, Privacy)
+ds2<-ds2%>%mutate_at(vars(Station.MAC,BSSID,Probed.ESSIDs),trimws)%>%mutate_at(vars(Station.MAC,BSSID,Probed.ESSIDs),na_if,"")
+ds2$First.time.seen<-as.POSIXct(ds2$First.time.seen,format = "%Y-%m-%d %H:%M:%S")
+ds2$Last.time.seen<-as.POSIXct(ds2$Last.time.seen,format = "%Y-%m-%d %H:%M:%S")
 ```
 
-d. Отсортировать точки доступа по интервалу времени, в течение которого они находились на связи, по убыванию.
+### Просмотр общей структуры данных 
 
 ```{r}
-wireNetData <- dataset1 %>% mutate(Time = difftime(Last.time.seen, First.time.seen, units = "mins")) %>% arrange(desc(Time)) %>% select(BSSID, Time)
-
-wireNetData %>% select(BSSID, Time)
+glimpse(ds1)
+glimpse(ds2)
 ```
 
-e. Обнаружить топ-10 самых быстрых точек доступа.
+## Анализ. Точки доступа.
+
+### Определить небезопасные точки доступа (без шифрования – OPN)
 
 ```{r}
-top_10_fastest <- dataset1 %>% arrange(desc(Speed)) %>% slice(1:10)
-top_10_fastest %>% select(BSSID, ESSID, Speed)
+unsafe_points<-ds1 %>%filter(Privacy=='OPN')%>%select(BSSID)%>%unique()
+unsafe_points%>%select(BSSID)
 ```
 
-f. Отсортировать точки доступа по частоте отправки запросов (beacons) в единицу времени по их убыванию.
+### Определить производителя для каждого обнаруженного устройства
 
 ```{r}
-beacon_rate <- dataset1 %>% mutate(beacon_rate = beacons /as.numeric(difftime(Last.time.seen,First.time.seen,units="mins"))) %>%filter(!is.infinite(beacon_rate)) %>%arrange(desc(beacon_rate))
-
-
-beacon_rate %>% select(BSSID, ESSID, beacon_rate)
+name<-sapply(unsafe_points,function(i) substr(i, 1, 8))%>%unique()
+cat(name,"\n")
+print('Eltex Enterprise Ltd; Apple, Inc; Eltex Enterprise Ltd; Cisco Systems, Inc; Taiyo Yuden Co., Ltd; Atheros Communications, Inc')
 ```
 
-4. Данные клиентов 
-a) Определить производителя для каждого обнаруженного устройства
+### Выявить устройства, использующие последнюю версию протокола шифрования WPA3, и названия точек доступа, реализованных на этих устройствах
 
 ```{r}
-manufa <- dataset2 %>% filter(BSSID != '(not associated)') %>% mutate(Manufacturer = substr(BSSID, 1, 8)) %>% select(Manufacturer)
-
-unique(manufa)
+ds1%>%filter(grepl("WPA3", Privacy))%>%select(BSSID,ESSID,Privacy)
 ```
 
-b) Обнаружить устройства, которые НЕ рандомизируют свой MAC адрес
+### Отсортировать точки доступа по интервалу времени, в течение которого они находились на связи, по убыванию.
 
 ```{r}
-non_randomized_mac <- dataset2 %>% filter(!grepl("^02|^06|^0A|^0E", BSSID)) %>% filter(BSSID != '(not associated)')
-
-non_randomized_mac %>% select(BSSID)
+ds1%>%mutate(time=difftime(Last.time.seen,First.time.seen))%>%arrange(desc(time))%>%select(BSSID,time)%>%head(10)
 ```
 
-c) Кластеризовать запросы от устройств к точкам доступа по их именам. Определить время появления устройства в зоне радиовидимости и время выхода его из нее.
+### Обнаружить топ-10 самых быстрых точек доступа.
 
 ```{r}
-clustered_requests <- dataset2 %>% group_by(Probed.ESSIDs) %>% summarise(
-first_seen = min(First.time.seen, na.rm = TRUE),
-last_seen = max(Last.time.seen, na.rm = TRUE))
+ds1%>%arrange(desc(Speed))%>%head(10)
+```
+### Отсортировать точки доступа по частоте отправки запросов (beacons) в единицу времени по их убыванию.
 
-clustered_requests
+```{r}
+bb<-ds1%>%mutate(bb=beacons/as.numeric(difftime(Last.time.seen,First.time.seen)))%>%filter(!is.infinite(bb))%>%arrange(desc(bb))
+bb%>%select(BSSID,bb)%>%head(10)
 ```
 
-d) Оценить стабильность уровня сигнала внури кластера во времени. Выявить наиболее стабильный кластер.
+## Данные клиентов
+
+### Определить производителя для каждого обнаруженного устройства
 
 ```{r}
-signal_stability <- dataset2 %>% group_by(Probed.ESSIDs) %>% summarise(sd_signal = sd(Power, na.rm = TRUE)) %>% arrange(sd_signal)
+name<-ds2%>%filter(BSSID!='(not associated)')%>%filter(!is.na(BSSID))%>%mutate(n=substr(BSSID,1,8))%>%select(n)
+unique(name)
+print('00:23:EB-Cisco Systems, Inc;
+00:25:00-Apple, Inc.;
+00:26:99-Cisco Systems, Inc;
+00:03:7F-Atheros Communications, Inc.;
+00:0D:97-Hitachi Energy USA Inc.;
+0C:80:63-Tp-Link Technologies Co.,Ltd.;
+DC:09:4C-Huawei Technologies Co.,Ltd;
+08:3A:2F-Guangzhou Juan Intelligent Tech Joint Stock Co.,Ltd;
+E0:D9:E3 E8:28:C1-Eltex Enterprise Ltd.;')
+```
 
-signal_stability 
+### Обнаружить устройства, которые НЕ рандомизируют свой MAC адрес
+
+```{r}
+norand<-ds2%>%filter(!grepl("^02|^06|^0A|^0E", BSSID))%>%filter(BSSID!='(not associated)')
+norand %>% select(BSSID)%>%head(10)
+```
+
+### Кластеризовать запросы от устройств к точкам доступа по их именам. Определить время появления устройства в зоне радиовидимости и время выхода его из нее.
+
+```{r}
+ds2%>%group_by(Probed.ESSIDs)%>%summarise(
+fseen=min(First.time.seen),lseen=max(Last.time.seen))%>%select(Probed.ESSIDs,fseen,lseen)
+
+```
+
+### Оценить стабильность уровня сигнала внури кластера во времени. Выявить наиболее стабильный кластер.
+
+```{r}
+ds2%>%mutate(t=difftime(Last.time.seen, First.time.seen))%>%filter(t!=0)%>%arrange(desc(t))%>%filter(!is.na(Probed.ESSIDs))%>%group_by(Probed.ESSIDs)%>%summarise(m=mean(t),Sd=sd(t))%>%filter(Sd!=0)%>%arrange(Sd)%>%select(Probed.ESSIDs,m,Sd)%>%head(1)
 ```
 
 ## Оценка результата
 
-В результате работы были импортированы данные из csv-файла и сделаны задания.
+  Был проведен анализ датасета с использованием библиотек dplyr,tidyverse,reader,выполнены задания и сформирован отчет
 
-## Вывод
+## Вывод 
 
-Были проанализированы датасеты с использованием tidyverse. Были улучшены навыки пользования библиотеками dplyr, read.
+  Были получены знания о методах исследования радиоэлектронной обстановки, получено представление о механизмах работы WIFi сетей на канальном и сетевом уровне модели OSI. Закреплены навыки использования языка R. Закреплены знания основных функций обработки данных экосистемы tidyverse.
